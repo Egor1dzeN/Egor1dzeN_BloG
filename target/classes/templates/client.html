@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script th:inline="javascript">
+
+    function test_get() {
+        let username = [[${username}]];
+
+        var xhr = new XMLHttpRequest();
+        let ans;
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                if (xhr.status == 200) {
+                    ans = xhr.responseText;
+                    let date_last_active = ans.split(':');
+                    let last_year = +date_last_active[0];
+                    let last_month = +date_last_active[1] - 1;
+                    let last_day = +date_last_active[2];
+                    let last_hour = +date_last_active[3];
+                    let last_minutes = +date_last_active[4];
+                    let last_seconds = +date_last_active[5];
+                    console.log(last_year, last_month, last_day, last_hour, last_minutes, last_seconds);
+                    let last_date = new Date(last_year, last_month, last_day, last_hour, last_minutes, last_seconds);
+                    let now_date = new Date();
+                    let now_year = now_date.getFullYear();
+                    let now_month = now_date.getMonth() + 1;
+                    let now_day = now_date.getDate();
+                    let now_hour = now_date.getHours();
+                    let now_minutes = now_date.getMinutes();
+                    let now_seconds = now_date.getSeconds();
+                    let razn_sec = Math.round((now_date - last_date) / 1000);
+                    console.log(razn_sec);
+                    let razn_seconds = razn_sec % 60;
+                    razn_sec /= 60;
+                    let razn_minutes = razn_sec % 60;
+                    razn_sec /= 60;
+                    let razn_hour = Math.round(razn_sec % 60) === razn_sec % 60 ? razn_sec % 60 : Math.round(razn_sec % 60) - 1;
+                    if (razn_hour <= 1) {
+                        if (razn_minutes <= 1) {
+                            document.getElementById("active").style.background = '#6aff54';
+                            document.getElementById('last_active').textContent = "В сети";
+                        } else if (razn_minutes <= 3) {
+                            document.getElementById('last_active').textContent = "Был в сети только что";
+                            document.getElementById("active").style.background = '#444444';
+                        } else {
+                            document.getElementById('last_active').textContent = 'Был в сети ' + Math.round(razn_minutes) + ' минут назад';
+                            document.getElementById("active").style.background = '#444444';
+                        }
+                    } else {
+                        document.getElementById('last_active').textContent = 'Был в сети ' + razn_hour + ' часов, ' + Math.round(razn_minutes) + ' минут назад';
+                        document.getElementById("active").style.background = '#444444';
+                    }
+                } else {
+                    ans = xhr.status;
+                }
+            }
+        };
+        console.log(username);
+        xhr.open('GET', '/get_time/' + username, true);
+        xhr.send(null);
+    }
+
+    test_get();
+    setInterval(test_get, 5000);
+
+</script>
+<header th:insert="blocks/header"></header>
+<div style="text-align:center;height: 30px; width:30px;background: #444444;border-radius: 15px" id="active"></div>
+<span id="last_active"></span>
+<h2 th:text="${username}"></h2>
+<a th:text="${message}" th:href="${ref_message}"></a>
+<div th:if="${add_friend}=='Добавить в друзья'">
+    <form th:action="'/client/add_friends/'+${username}" method="post">
+        <input type="submit" th:value="${add_friend}">
+    </form>
+</div>
+<div th:if="${add_friend}=='Вам отправили заявку, добавить в друзья'">
+    <form th:action="'/client/add_friends/'+${username}" method="post">
+        <span>Вам отправили заявку в друзья!</span>
+        <input type="submit" value="Добавить в друзья">
+    </form>
+</div>
+<div th:if="${add_friend}=='Вы уже отправили заявку в друзья'">
+    <span>Вы отправили заявку в друзья</span>
+    <span>	&#128578;</span>
+    <form th:action="'/client/delete_friends/'+${username}" method="post">
+        <input type="submit" value="Отменить">
+    </form>
+</div>
+<div th:if="${add_friend}=='Вы в друзьях'">
+    <span>Вы в друзьях</span><span> &#128512; </span>
+    <form th:action="'/client/delete_friends/'+${username}" method="post">
+        <input type="submit" value="Удалить из друзей">
+    </form>
+</div>
+<h2>Блоги пользователя</h2>
+<table>
+    <th:block th:each="blog:${client_blogs}">
+        <tr>
+            <td th:text="${blog.getText_blog()}"/>
+        </tr>
+    </th:block>
+</table>
+<script th:inline="javascript">
+    let isMove = false;
+    let date1 = new Date();
+
+    function move_mouse() {
+        isMove = true;
+        date1 = new Date();
+    }
+
+    function check_active() {
+        let date2 = new Date();
+        if ((date2 - date1) / 1000 > 5) {
+            console.log("offline");
+            isMove = false;
+        } else {
+            update_active_time();
+            console.log("online");
+        }
+    }
+
+    addEventListener("mousemove", move_mouse);
+    setInterval(check_active, 3000);
+
+    function update_active_time() {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                } else {
+                    console.log(xhr.status);
+                }
+            }
+        };
+
+        let date = new Date();
+        let username = [[${user.getUsername()}]] + '';
+        xhr.open('POST', '/update_time', true);
+        xhr.send(username);
+    }
+</script>
+</body>
+</html>

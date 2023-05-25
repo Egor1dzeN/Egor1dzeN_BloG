@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        p:hover {
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+<body>
+
+<script src="/css/client_me.js" th:inline="javascript"></script>
+<header th:insert="blocks/header"></header>
+
+<p onclick="window.history.go(-1);" onmouseover="">Назад</p>
+<h1>Мой личный кабинет</h1>
+
+<img th:src="'/images/'+${id}" alt="" height="80px" style="border-radius: 10px; align-items: center">
+<h2 th:text="${username}"></h2>
+<div style="text-align:center;height: 30px; width:30px;background: #444444;border-radius: 15px" id="active">
+
+</div>
+<h3>Добавить новую аватарку</h3>
+<form action="/add_avatar" method="post" enctype="multipart/form-data">
+    <input type="file" name="photo">
+    <input type="submit" VALUE="Добавить!">
+</form>
+<div th:each="id:${list_id}">
+    <img th:src="'/images/'+${id}" height="100px">
+</div>
+<h2>Блоги пользователя</h2>
+<table>
+    <th:block th:each="blog:${client_blogs}">
+        <tr>
+            <td th:text="${blog.getText_blog()}"/>
+        </tr>
+    </th:block>
+</table>
+<a href="/logout" style="text-decoration: none">Выйти из аккаунта</a>
+<script th:inline="javascript">
+let isMove = false;
+let date1 = new Date();
+
+function move_mouse() {
+    isMove = true;
+    date1 = new Date();
+}
+
+function check_active() {
+    let date2 = new Date();
+    if ((date2 - date1) / 1000 > 5) {
+        console.log("offline");
+        document.getElementById("active").style.background = '#444444';
+        isMove = false;
+    } else {
+        update_active_time();
+        document.getElementById("active").style.background = '#6aff54';
+        console.log("online");
+    }
+}
+
+addEventListener("mousemove", move_mouse);
+setInterval(check_active, 3000);
+
+function update_active_time() {
+    const xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                console.log(xhr.responseText);
+            } else {
+                console.log(xhr.status);
+            }
+        }
+    };
+
+    let date = new Date();
+    let username = [[${user.getUsername()}]] + '';
+    xhr.open('POST', '/update_time', true);
+    xhr.send(username);
+}
+</script>
+</body>
+</html>

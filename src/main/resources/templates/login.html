@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<script src="/css/login.js"></script>
+<img src="/css/back-4mPz2J4SK-transformed.png" width="50" onclick="back()">
+<div class="login">
+  <h1>Войти в аккаунт</h1>
+  <form method="post" action="/login">
+    <input type="text" name="username" placeholder="Username" required="required" />
+    <input type="password" name="password" placeholder="Password" required="required" />
+    <button type="submit" class="btn btn-primary btn-block btn-large">Войти</button>
+  </form>
+  <h5 onclick="window.history.go(-1);document.location.href='/registration'">Зарегестрироваться</h5>
+</div>
+</body>
+</html>

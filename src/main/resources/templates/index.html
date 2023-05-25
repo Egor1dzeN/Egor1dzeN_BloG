@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Главная</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/style.css">
+  <style>
+    a{
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<div>
+    <header th:insert="blocks/header"></header>
+    <h1>Главная страница</h1>
+</div>
+<script th:inline="javascript">
+    let isMove = false;
+    let date1 = new Date();
+
+    function move_mouse() {
+        isMove = true;
+        date1 = new Date();
+    }
+
+    function check_active() {
+        let date2 = new Date();
+        if ((date2 - date1) / 1000 > 5) {
+            console.log("offline");
+            isMove = false;
+        } else {
+            update_active_time();
+            console.log("online");
+        }
+    }
+
+    addEventListener("mousemove", move_mouse);
+    setInterval(check_active, 3000);
+
+    function update_active_time() {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                } else {
+                    console.log(xhr.status);
+                }
+            }
+        };
+
+        let date = new Date();
+        let username = [[${user.getUsername()}]] + '';
+        xhr.open('POST', '/update_time', true);
+        xhr.send(username);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Новости</title>
+</head>
+<body>
+<header th:insert="blocks/header"></header>
+<div>
+    <a href="/blog/new">Добавить новый блог</a>
+</div>
+<div th:each="blog:${list_blogs_friends}">
+    <span th:text="${blog.getText_blog()}"></span>
+</div>
+<table>
+    <th:block th:each="blog:${list_blogs_friends}">
+        <tr>
+            <td th:text="${blog.getText_blog()}"/>
+            <td><a th:text="${blog.getUser().getUsername()}" th:href="'/client/'+${blog.getUser().getUsername()}"></a>
+            </td>
+            <td th:text="${blog.getLikes().size()}" th:id="'like'+${blog.getId()}"></td>
+            <td>
+                <button onclick="test_like(this)" th:id="${blog.getId()}">Like</button>
+            </td>
+        </tr>
+    </th:block>
+</table>
+<script th:inline="javascript">
+    let obj_list = [[${list_blogs_friends}]]
+    console.log(obj_list)
+    let user = [[${user}]];
+    update();
+    function update() {
+        for (let i = 0; i < obj_list.length; ++i) {
+            let obj = obj_list[i]['likes'];
+            let flag = false;
+            for(let j = 0;j<obj.length;++j){
+                if(obj[j]['username'] === user['username']){
+                    flag = true;
+                    break;
+                }
+            }
+            if (flag) {
+                console.log('есть такой')
+                document.getElementById(obj_list[i]['id']).style.background = 'white';
+                document.getElementById(obj_list[i]['id']).textContent = "Unlike";
+            } else {
+                document.getElementById(obj_list[i]['id']).style.background = 'red';
+                document.getElementById(obj_list[i]['id']).textContent = "Like";
+                console.log('нет такого')
+            }
+
+        }
+    }
+    function send_likes_info(id, user){
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                } else {
+                    console.log(xhr.status);
+                }
+            }
+        };
+
+        xhr.open('POST', '/like/'+id, true);
+        let username = user['username']
+        xhr.send(username);
+    }
+
+    function test_like(el) {
+      let obj;
+      let id;
+        for(let i = 0;i<obj_list.length;++i){
+          if(obj_list[i]['id'] == el.id){
+            obj = obj_list[i]['likes'];
+            id = i;
+          }
+        }
+        let flag = false;
+        for(let j = 0;j<obj.length;++j){
+            if(obj[j]['username'] === user['username']){
+                flag = true;
+                break;
+            }
+        }
+      if (flag) {
+        document.getElementById(obj_list[id]['id']).style.background = 'red';
+        document.getElementById(obj_list[id]['id']).textContent = "Like";
+        obj_list[id]['likes'] = obj.filter(function (f){console.log('f',f['username']);
+          console.log('user',user['username'])
+          return f['username']!==user['username']});
+        send_likes_info(obj_list[id]['id'], user);
+        let num_like= +document.getElementById('like'+el.id).textContent-1;
+          document.getElementById('like'+el.id).textContent= num_like+'';
+        console.log('kol = ',num_like);
+      } else {
+        document.getElementById(obj_list[id]['id']).style.background = 'white';
+        document.getElementById(obj_list[id]['id']).textContent = "Unlike";
+        obj.push(user);send_likes_info(obj_list[id]['id'], user);
+          let num_like= +document.getElementById('like'+el.id).textContent+1;
+          document.getElementById('like'+el.id).textContent= num_like+'';
+          console.log('kol = ',num_like);
+      }
+
+        console.log(obj_list);
+    }
+</script>
+<script th:inline="javascript">
+    let isMove = false;
+    let date1 = new Date();
+
+    function move_mouse() {
+        isMove = true;
+        date1 = new Date();
+    }
+
+    function check_active() {
+        let date2 = new Date();
+        if ((date2 - date1) / 1000 > 5) {
+            console.log("offline");
+            isMove = false;
+        } else {
+            update_active_time();
+            console.log("online");
+        }
+    }
+
+    addEventListener("mousemove", move_mouse);
+    setInterval(check_active, 3000);
+
+    function update_active_time() {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                } else {
+                    console.log(xhr.status);
+                }
+            }
+        };
+
+        let date = new Date();
+        let username = [[${user.getUsername()}]] + '';
+        xhr.open('POST', '/update_time', true);
+        xhr.send(username);
+    }
+</script>
+</body>
+</html>

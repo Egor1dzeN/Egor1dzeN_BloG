@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script th:inline="javascript">
+    let date1 = new Date();
+    function opa() {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    document.body.innerText = 'Response: ' + xhr.responseText;
+                } else {
+                    document.body.innerText = 'Error: ' + xhr.status;
+                }
+            }
+        };
+
+        let date = new Date();
+        let username = [[${name.getUsername()}]]+' ';
+        xhr.open('POST', '/examples/echo', true);
+        xhr.send(username);
+        date = new Date();
+    }
+    function test_get(){
+        var xhr = new XMLHttpRequest();
+        let ans;
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                if (xhr.status == 200) {
+                   ans = xhr.responseText;
+                } else {
+                    ans = xhr.status;
+                }
+            }
+        };
+        let obj = [[${name}]];console.log(obj);
+        xhr.open('GET', '/examples/echo?text='+obj, true);
+        xhr.send(null);
+    }
+
+    function click1() {
+        console.log('tets')
+         let obj = [[${name}]];
+         console.log(obj)
+    }
+    let elem = document.querySelector("body");
+    elem.addEventListener("click",test_click);
+    function test_click(){
+        let date2 = new Date();
+       console.log(date2-date1);
+    }
+    function test(){
+        let date2 = new Date();
+        if((date2-date1)/1000<20){
+            console.log(date2-date1)
+            console.log("online");
+        }else{
+            console.log("offline");
+        }
+    }
+    setInterval(test,500);
+
+</script>
+<span onclick="click1()">oap</span>
+<span>[[${name}]]</span>
+<button onclick="opa()" id="n">Send</button>
+</body>
+</html>

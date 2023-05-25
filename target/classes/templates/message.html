@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link th:href="@{/css/message.css}" rel="stylesheet" />
+</head>
+<body>
+<header th:insert="blocks/header"></header>
+<table style="height: 800px">
+    <tr >
+        <td width="300px" rowspan="2" valign="top">
+            <div th:each="user1:${userList}">
+                <a th:text="${user1.getUsername()}" th:href="'/messanger/'+${user1.getId()}"></a>
+            </div>
+
+        </td>
+        <td width="700px" height="700px" valign="top">
+            <div th:if="${id}=='0'">
+                dasds
+            </div>
+            <div th:if="${id}!='0'">
+                ghjfdghjg
+            </div>
+
+
+        </td>
+    </tr>
+    <tr>
+        <form method="post" action="/send/message">
+            <td>
+                <input type="text" name="job_num">
+                <input type="submit" value="Отправить!">
+            </td>
+        </form>
+    </tr>
+</table>
+<script th:inline="javascript">
+    let isMove = false;
+    let date1 = new Date();
+
+    function move_mouse() {
+        isMove = true;
+        date1 = new Date();
+    }
+
+    function check_active() {
+        let date2 = new Date();
+        if ((date2 - date1) / 1000 > 5) {
+            console.log("offline");
+            isMove = false;
+        } else {
+            update_active_time();
+            console.log("online");
+        }
+    }
+
+    addEventListener("mousemove", move_mouse);
+    setInterval(check_active, 3000);
+
+    function update_active_time() {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                } else {
+                    console.log(xhr.status);
+                }
+            }
+        };
+
+        let date = new Date();
+        let username = [[${user.getUsername()}]] + '';
+        xhr.open('POST', '/update_time', true);
+        xhr.send(username);
+    }
+</script>
+</body>
+</html>

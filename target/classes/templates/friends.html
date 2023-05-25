@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My friends</title>
+</head>
+<body>
+<script src="/css/friends_find.js"></script>
+<header th:insert="blocks/header"></header>
+<h1>Мои друзья</h1>
+<div th:each="friend:${list2}">
+    <div style="background: #cedefd; height: 100px">
+        <img th:src="'/images/'+${friend.getUser1().getPreviewImageId()}" height="60px" style="border-radius: 10px" align="middle" />
+        <div style="width: 20px; height: 20px; background: black; border-radius: 10px"></div>
+        <a th:text="${friend.getUser1().getUsername()}" th:href="'/client/'+${friend.getUser1().getUsername()}"></a>
+
+    </div>
+</div>
+<div th:each="friend:${list1}">
+    <div style="background: #cedefd; height: 100px">
+    <img th:src="'/images/'+${friend.getUser2().getPreviewImageId()}" height="60px" style="border-radius: 10px" align="middle" />
+    <div style="width: 20px; height: 20px; background: black; border-radius: 10px"></div>
+        <a th:text="${friend.getUser2().getUsername()}" th:href="'/client/'+${friend.getUser2().getUsername()}"></a>
+
+    </div>
+</div>
+
+<h1>Найти пользователя:</h1>
+<form action="/friends/find" method="post">
+    <input type="text" placeholder="Введите ник пользователя" name="username" >
+    <input type="submit" value="Поиск&#128373;">
+</form>
+<div th:each="user:${list}">
+    <span th:text="${user.getUsername()}"></span>
+</div>
+<script th:inline="javascript">
+    let isMove = false;
+    let date1 = new Date();
+
+    function move_mouse() {
+        isMove = true;
+        date1 = new Date();
+    }
+
+    function check_active() {
+        let date2 = new Date();
+        if ((date2 - date1) / 1000 > 5) {
+            console.log("offline");
+            isMove = false;
+        } else {
+            update_active_time();
+            console.log("online");
+        }
+    }
+
+    addEventListener("mousemove", move_mouse);
+    setInterval(check_active, 3000);
+
+    function update_active_time() {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                } else {
+                    console.log(xhr.status);
+                }
+            }
+        };
+
+        let date = new Date();
+        let username = [[${user.getUsername()}]] + '';
+        xhr.open('POST', '/update_time', true);
+        xhr.send(username);
+    }
+</script>
+</body>
+</html>
