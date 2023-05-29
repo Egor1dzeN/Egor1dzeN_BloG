@@ -3,24 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link th:href="@{/css/message.css}" rel="stylesheet" />
+    <link th:href="@{/css/message.css}" rel="stylesheet"/>
 </head>
-<body>
+<body style="min-height: 850px; scroll-behavior: smooth;" >
 <header th:insert="blocks/header"></header>
 <table style="height: 800px">
-    <tr >
+    <tr>
         <td width="300px" rowspan="2" valign="top">
             <div th:each="user1:${userList}">
                 <a th:text="${user1.getUsername()}" th:href="'/messanger/'+${user1.getId()}"></a>
             </div>
 
         </td>
-        <td width="700px" height="700px" valign="top">
+        <td width="700px" height="700px" valign="top" style="overflow-y: scroll;">
             <div th:if="${id}=='0'">
-                dasds
+                Выберите диалог с пользователем
             </div>
             <div th:if="${id}!='0'">
-                ghjfdghjg
+                <div th:each="message : ${listMessage}">
+                    <div th:if="${message.getReceiver()} == ${user}" style="background: #4a77d4">
+                        <h4 th:text="${message.getText_message()}"></h4>
+                        <span th:text="${message.getDate_message()}"></span>
+                    </div>
+                    <div th:if="${message.getReceiver()} == ${friend}">
+                        <h4 th:text="${message.getText_message()}"></h4>
+                        <span th:text="${message.getDate_message()}"></span>
+                    </div>
+
+                </div>
             </div>
 
 
@@ -29,7 +39,8 @@
     <tr>
         <form method="post" action="/send/message">
             <td>
-                <input type="text" name="job_num">
+                <input type="text" name="text_message">
+                <input type="hidden" name="id" th:value="${id}">
                 <input type="submit" value="Отправить!">
             </td>
         </form>

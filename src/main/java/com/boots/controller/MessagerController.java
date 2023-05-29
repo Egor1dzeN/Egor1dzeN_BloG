@@ -80,26 +80,46 @@ public class MessagerController {
     FriendsRepository friendsRepository;
     @GetMapping("/messanger/{id}")
     public String get_messanger_id(@PathVariable Long id, Model model){
-        User user = userService.get_user();
-        model.addAttribute("user",user);
-        List<Friends> friendsList = friendsRepository.findAll();
+        User user = userService.get_user(); //I
+        User friend = userRepository.findUserById(id); //Friend
         List<User> userList = new ArrayList<>();
-        for(Friends friend:friendsList){
-            if(friend.getUser1() == user){
-                userList.add(friend.getUser2());
-            }else if( friend.getUser2()==user){
-                userList.add(friend.getUser1());
+        List<Friends> friendsList = friendsRepository.findAll();
+        for(Friends friends:friendsList){
+            if(friends.getUser1() == user  && friends.getType_friends() == 3){
+                userList.add(friends.getUser2());
+            }
+            else if(friends.getUser2() == user  && friends.getType_friends() == 3){
+                userList.add(friends.getUser1());
             }
         }
-        model.addAttribute("userList", userList);
+        model.addAttribute("user",user);
+        model.addAttribute("userList",userList);
+        System.out.println(userList.size());
         if(id==0){
             model.addAttribute("id", "0");
         }
         else{
-            model.addAttribute("id","1");
+            model.addAttribute("id",id);
             List<Message> messageList = messageRepository.findAll();
+            List<Message> sort_messageList = new ArrayList<>();
+            for(Message message: messageList){
+                if((message.getSender() == user && message.getReceiver() == friend) || (message.getReceiver() == user && message.getSender() == friend)){
+                    sort_messageList.add(message);
+                }
+            }
+            model.addAttribute("listMessage", sort_messageList);
+            model.addAttribute("user", user);
+            model.addAttribute("friend", friend);
         }
         return "message";
+    }
+    @PostMapping("/send/message")
+    public String send_messgae(@RequestParam String text_message, @RequestParam String id){
+        User i = userService.get_user();
+        User friend = userRepository.findUserById(Long.valueOf(id));
+        Message message = new Message(i,friend,text_message,new Date());
+        messageRepository.save(message);
+        return "redirect:/messanger/"+id;
     }
 }
 
