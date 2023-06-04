@@ -31,7 +31,7 @@
     <input type="submit" value="Поиск&#128373;">
 </form>
 <div th:each="user:${list}">
-    <span th:text="${user.getUsername()}"></span>
+    <a th:text="${user.getUsername()}" th:href="'/client/'+${user.getUsername()}"></a>
 </div>
 <script th:inline="javascript">
     let isMove = false;
