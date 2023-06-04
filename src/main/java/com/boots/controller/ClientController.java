@@ -80,7 +80,13 @@ public class ClientController {
             }
 
         }
-
+        List<Images> list = imagesRepository.findAll();
+        List<Long> list_id = new ArrayList<>();
+        for(Images images:list){
+            if(images.getUser().getUsername().equals(username))
+                list_id.add(images.getId());
+        }
+        model.addAttribute("list_id",list_id);
         System.out.println(user1.getId() + " " + user2.getId());
         model.addAttribute("i", i);
         model.addAttribute("logout", logout);

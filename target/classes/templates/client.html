@@ -97,6 +97,9 @@
         <input type="submit" value="Удалить из друзей">
     </form>
 </div>
+<div th:each="id:${list_id}">
+    <img th:src="'/images/'+${id}" height="100px">
+</div>
 <h2>Блоги пользователя</h2>
 <table>
     <th:block th:each="blog:${client_blogs}">
